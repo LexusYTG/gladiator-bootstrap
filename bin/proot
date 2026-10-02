@@ -1,0 +1,7 @@
+#!/data/data/com.glads1/files/usr/bin/sh
+P=/data/data/com.glads1/files/usr
+export PROOT_TMP_DIR="$P/tmp"
+export PROOT_LOADER="$P/libexec/proot/loader"
+export PROOT_LOADER_32="$P/libexec/proot/loader32"
+mkdir -p "$PROOT_TMP_DIR"
+exec "$P/bin/proot.real" "$@"

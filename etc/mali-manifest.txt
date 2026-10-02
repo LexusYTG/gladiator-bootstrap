@@ -1,0 +1,54 @@
+# gladiator mali manifest — cierre recursivo de deps de vulkan.mali.so
+# formato: /ruta/origen | nombre_destino
+# destino comun: $PREFIX/lib/mali/
+# extract-mali.sh lee esto y copia lo que exista en este dispositivo
+# las libs que ya estan en /system/lib64 NO van aca
+
+/vendor/lib64/hw/vulkan.mali.so                                | vulkan.mali.so
+/vendor/lib64/egl/libGLES_mali.so                              | libGLES_mali.so
+/vendor/lib64/arm.mali.platform-V2-ndk.so                      | arm.mali.platform-V2-ndk.so
+/vendor/lib64/libarm_egl_properties_sysprop.so                 | libarm_egl_properties_sysprop.so
+/vendor/lib64/libarm_mali_config_sysprops.so                   | libarm_mali_config_sysprops.so
+/vendor/lib64/android.hardware.common-V2-ndk.so                | android.hardware.common-V2-ndk.so
+/vendor/lib64/android.hardware.graphics.allocator-V2-ndk.so    | android.hardware.graphics.allocator-V2-ndk.so
+/vendor/lib64/android.hardware.graphics.common-V5-ndk.so       | android.hardware.graphics.common-V5-ndk.so
+/vendor/lib64/android.hardware.graphics.common@1.0.so          | android.hardware.graphics.common@1.0.so
+/vendor/lib64/android.hardware.graphics.common@1.1.so          | android.hardware.graphics.common@1.1.so
+/vendor/lib64/android.hardware.graphics.common@1.2.so          | android.hardware.graphics.common@1.2.so
+/vendor/lib64/android.hardware.graphics.mapper@2.0.so          | android.hardware.graphics.mapper@2.0.so
+/vendor/lib64/android.hardware.graphics.mapper@2.1.so          | android.hardware.graphics.mapper@2.1.so
+/vendor/lib64/android.hardware.graphics.mapper@3.0.so          | android.hardware.graphics.mapper@3.0.so
+/vendor/lib64/android.hardware.graphics.mapper@4.0.so          | android.hardware.graphics.mapper@4.0.so
+/vendor/lib64/android.hidl.memory.token@1.0.so                 | android.hidl.memory.token@1.0.so
+/vendor/lib64/android.hidl.memory@1.0.so                       | android.hidl.memory@1.0.so
+/vendor/lib64/libbase.so                                       | libbase.so
+/vendor/lib64/libc++.so                                        | libc++.so
+/vendor/lib64/libcutils.so                                     | libcutils.so
+/vendor/lib64/libdmabufheap.so                                 | libdmabufheap.so
+/vendor/lib64/libdpframework.so                                | libdpframework.so
+/vendor/lib64/libged.so                                        | libged.so
+/vendor/lib64/libgpu_aux.so                                    | libgpu_aux.so
+/vendor/lib64/libgpud.so                                       | libgpud.so
+/vendor/lib64/libgralloc_extra.so                              | libgralloc_extra.so
+/vendor/lib64/libgralloc_metadata.so                           | libgralloc_metadata.so
+/vendor/lib64/libgralloctypes.so                               | libgralloctypes.so
+/vendor/lib64/libgralloctypes_mtk.so                           | libgralloctypes_mtk.so
+/vendor/lib64/libhardware.so                                   | libhardware.so
+/vendor/lib64/libhidlbase.so                                   | libhidlbase.so
+/vendor/lib64/libhidlmemory.so                                 | libhidlmemory.so
+/vendor/lib64/libion.so                                        | libion.so
+/vendor/lib64/libladder.so                                     | libladder.so
+/vendor/lib64/liblzma.so                                       | liblzma.so
+/vendor/lib64/libmml.so                                        | libmml.so
+/vendor/lib64/libpq_sec.so                                     | libpq_sec.so
+/vendor/lib64/libpqhdrmetaparser.so                            | libpqhdrmetaparser.so
+/vendor/lib64/libpqsharememory.so                              | libpqsharememory.so
+/vendor/lib64/libpqtuning.so                                   | libpqtuning.so
+/vendor/lib64/libsdrparser.so                                  | libsdrparser.so
+/vendor/lib64/libunwindstack.so                                | libunwindstack.so
+/vendor/lib64/libutils.so                                      | libutils.so
+/vendor/lib64/libutilscallstack.so                             | libutilscallstack.so
+/vendor/lib64/libz.so                                          | libz.so
+/vendor/lib64/vendor.mediatek.hardware.mms-V1-ndk.so           | vendor.mediatek.hardware.mms-V1-ndk.so
+/vendor/lib64/vendor.mediatek.hardware.pq@2.0.so               | vendor.mediatek.hardware.pq@2.0.so
+/vendor/lib64/vendor.mediatek.hardware.pq_aidl-V2-ndk.so       | vendor.mediatek.hardware.pq_aidl-V2-ndk.so
