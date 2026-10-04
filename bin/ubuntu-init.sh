@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-
 PROGRESS="${PD_PROGRESS_FILE:-/dev/null}"
 progress() { printf 'PROGRESS|%s|%s\n' "$1" "$2" >> "$PROGRESS"; }
 
@@ -18,10 +17,29 @@ if ! DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
     exit 1
 fi
 
+progress 85 "Instalando Scutum + Spatha + gl4es…"
+[ -d /host-spatha ] || { printf 'ERROR|%s\n' "/host-spatha no montado" >> "$PROGRESS"; exit 1; }
+
+mkdir -p /usr/lib/aarch64-linux-gnu /usr/share/vulkan/icd.d
+
+# Scutum reemplaza Mesa
+install -m 0755 /host-spatha/libEGL.so     /usr/lib/aarch64-linux-gnu/
+install -m 0755 /host-spatha/libGLESv2.so  /usr/lib/aarch64-linux-gnu/
+
+# gl4es
+install -m 0755 /host-spatha/libGL.so.1    /usr/lib/aarch64-linux-gnu/
+
+# Spatha ICD
+install -m 0755 /host-spatha/libspatha-icd.so /usr/lib/aarch64-linux-gnu/
+install -m 0644 /host-spatha/spatha_icd.json  /usr/share/vulkan/icd.d/
+
+progress 88 "Instalando scutum-guard…"
+[ -f /host-spatha/scutum-guard.sh ] && install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh
+[ -f /host-spatha/gl-run ] && install -m 0755 /host-spatha/gl-run /usr/local/bin/gl-run
+
 progress 90 "Copiando sesar-shell…"
-[ -f /tmp/sesar-shell ] || { printf 'ERROR|%s\n' "sesar-shell no llego al container" >> "$PROGRESS"; exit 1; }
-cp /tmp/sesar-shell /root/sesar-shell
-chmod 755 /root/sesar-shell
+[ -f /tmp/sesar-shell ] || { printf 'ERROR|%s\n' "sesar-shell no llego" >> "$PROGRESS"; exit 1; }
+install -m 0755 /tmp/sesar-shell /root/sesar-shell
 
 progress 92 "Limpiando…"
 apt clean

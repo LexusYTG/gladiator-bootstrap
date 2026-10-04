@@ -1,0 +1,24 @@
+#!/bin/bash
+app="$1"; shift
+[ -z "$app" ] && { echo "uso: gl-run <app> [args...]" >&2; exit 1; }
+if [ -x "$app" ]; then bin="$app"
+elif command -v "$app" >/dev/null 2>&1; then bin="$(command -v "$app")"
+else echo "gl-run: no encontrado: $app" >&2; exit 127; fi
+export XDG_RUNTIME_DIR=/tmp
+export SDL_VIDEO_X11_FORCE_EGL=1
+export SDL_VIDEO_EGL_DRIVER=/usr/lib/aarch64-linux-gnu/libEGL.so
+export ALSOFT_DRIVERS=null
+[ -z "$SPATHA_SOCK" ] && export SPATHA_SOCK=/host-tmp/spatha.sock
+[ -z "$SCUTUM_SOCK" ] && export SCUTUM_SOCK=/host-tmp/scutum.sock
+needs_glx() {
+    local b="$1"
+    [ "$GL_RUN_FORCE_GLX" = "1" ] && return 0
+    ! file "$b" 2>/dev/null | grep -q "ELF" && return 1
+    ldd "$b" 2>/dev/null | grep -q 'libGL\.so\.1' && return 0
+    ldd "$b" 2>/dev/null | grep -qE 'libSDL2|libglfw' && return 0
+    return 1
+}
+if needs_glx "$bin"; then
+    export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libGL.so.1${LD_PRELOAD:+:$LD_PRELOAD}
+fi
+exec "$bin" "$@"

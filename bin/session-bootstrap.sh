@@ -6,6 +6,7 @@ X11_DISPLAY="${X11_DISPLAY:-:0}"
 PROGRESS="$PREFIX/var/log/progress.txt"
 CONTAINER_NAME="${CONTAINER_NAME:-ubuntu}"
 ROOTFS="$PREFIX/var/lib/proot-distro/containers/$CONTAINER_NAME/rootfs"
+HOST_TMP="$PREFIX/tmp/host-tmp"
 
 progress() { mkdir -p "$(dirname "$PROGRESS")"; printf 'PROGRESS|%s|%s\n' "$1" "$2" >> "$PROGRESS"; }
 error_exit() { printf 'ERROR|%s\n' "$1" >> "$PROGRESS"; exit 1; }
@@ -37,6 +38,29 @@ if ! pgrep -f 'termux-x11' >/dev/null 2>&1; then
     sleep 2
 fi
 
+progress 55 "Arrancando daemons…"
+mkdir -p "$PREFIX/var/log" "$HOST_TMP"
+
+if ! pgrep -f spathad >/dev/null 2>&1; then
+    rm -f "$HOST_TMP/spatha.sock"
+    LD_LIBRARY_PATH="/system/lib64:/vendor/lib64:/system/lib64/hw:/vendor/lib64/hw" \
+    SPATHA_SOCK="$HOST_TMP/spatha.sock" SPATHA_DEBUG=1 \
+        setsid "$PREFIX/bin/spathad" >> "$PREFIX/var/log/spathad.log" 2>&1 &
+    for i in $(seq 1 10); do [ -S "$HOST_TMP/spatha.sock" ] && break; sleep 1; done
+fi
+[ -S "$HOST_TMP/spatha.sock" ] || error_exit "spathad no levanto el socket"
+
+if ! pgrep -f scutumd >/dev/null 2>&1; then
+    rm -f "$HOST_TMP/scutum.sock"
+    LD_LIBRARY_PATH="/system/lib64:/vendor/lib64:/system/lib64/hw:/vendor/lib64/hw" \
+    SCUTUM_LIBDIR=/system/lib64 \
+    SCUTUM_SOCK="$HOST_TMP/scutum.sock" \
+    LD_PRELOAD="$PREFIX/bin/libcrashisolate.so" \
+        setsid "$PREFIX/bin/scutumd" >> "$PREFIX/var/log/scutumd.log" 2>&1 &
+    for i in $(seq 1 10); do [ -S "$HOST_TMP/scutum.sock" ] && break; sleep 1; done
+fi
+[ -S "$HOST_TMP/scutum.sock" ] || error_exit "scutumd no levanto el socket"
+
 progress 60 "Preparando entorno grafico…"
 mkdir -p "$ROOTFS/root" "$ROOTFS/tmp"
 cp "$PREFIX/share/sesar/sesar-shell" "$ROOTFS/tmp/sesar-shell"
@@ -44,21 +68,19 @@ cp "$PREFIX/bin/ubuntu-init.sh" "$ROOTFS/tmp/ubuntu-init.sh"
 chmod 755 "$ROOTFS/tmp/sesar-shell"
 chmod +x "$ROOTFS/tmp/ubuntu-init.sh"
 
-mkdir -p "$ROOTFS/etc/vulkan/icd.d"
-cat > "$ROOTFS/etc/vulkan/icd.d/mali.json" << 'ICDEOF'
-{"file_format_version":"1.0.0","ICD":{"library_path":"/opt/mali/vulkan.mali.so","api_version":"1.3.0"}}
-ICDEOF
-
 progress 70 "Instalando escritorio…"
 "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
     --bind "$PREFIX/tmp/.X11-unix:/tmp/.X11-unix" \
     --bind "$PREFIX/lib/mali:/opt/mali" \
+    --bind "$PREFIX/share/spatha:/host-spatha" \
+    --bind "$HOST_TMP:/host-tmp" \
     -- /bin/bash -c '
         export DISPLAY='"$X11_DISPLAY"'
         export LD_LIBRARY_PATH=/opt/mali:$LD_LIBRARY_PATH
-        export VK_ICD_FILENAMES=/etc/vulkan/icd.d/mali.json
+        export SPATHA_SOCK=/host-tmp/spatha.sock
+        export SCUTUM_SOCK=/host-tmp/scutum.sock
         export PD_PROGRESS_FILE='"$PROGRESS"'
-        /tmp/ubuntu-init.sh || { printf "ERROR|init $CONTAINER_NAME fallo\n" >> '"$PROGRESS"'; exit 1; }
+        /tmp/ubuntu-init.sh || { printf "ERROR|init fallo\n" >> '"$PROGRESS"'; exit 1; }
     '
 
 progress 96 "Lanzando escritorio…"
@@ -67,10 +89,15 @@ printf 'DONE\n' >> "$PROGRESS"
 exec "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
     --bind "$PREFIX/tmp/.X11-unix:/tmp/.X11-unix" \
     --bind "$PREFIX/lib/mali:/opt/mali" \
+    --bind "$PREFIX/share/spatha:/host-spatha" \
+    --bind "$HOST_TMP:/host-tmp" \
     -- /bin/bash -c '
         export DISPLAY='"$X11_DISPLAY"'
         export LD_LIBRARY_PATH=/opt/mali:$LD_LIBRARY_PATH
-        export VK_ICD_FILENAMES=/etc/vulkan/icd.d/mali.json
+        export SPATHA_SOCK=/host-tmp/spatha.sock
+        export SCUTUM_SOCK=/host-tmp/scutum.sock
+        [ -x /usr/local/bin/scutum-guard.sh ] || install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh 2>/dev/null
+        /usr/local/bin/scutum-guard.sh 2>/dev/null || true
         cd /root
         ./sesar-shell setup
         exec ./sesar-shell session
