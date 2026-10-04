@@ -1,0 +1,44 @@
+Attribution — Gladiator Bootstrap
+=================================
+
+Este bootstrap combina:
+
+1. Termux base (bin/, lib/, include/, etc/, libexec/, var/, share/LICENSES/)
+   Termux se distribuye bajo sus propias licencias (mayormente GPL-3.0
+   con partes LGPL/MIT/Apache). Ver share/LICENSES/ para el listado
+   completo. Copyright (c) Termux contributors.
+
+2. GL4ES — libGL.so.1
+   Traductor OpenGL 1.x/2.x -> OpenGL ES.
+   Copyright (c) 2016-2018 Sebastien Chevalier.
+   Licencia: MIT. Ver share/LICENSES/MIT.txt.
+
+3. Scutum — bin/scutumd, bin/libcrashisolate.so, share/spatha/libEGL.so,
+   share/spatha/libGLESv2.so
+   Puente GLES/EGL bionic<->glibc.
+   Copyright (c) 2026 LexusYTG.
+   Licencia: MIT. Ver share/LICENSES/MIT.txt.
+   Fuente: https://github.com/LexusYTG/Scutum
+
+4. Spatha — bin/spathad, share/spatha/libspatha-icd.so,
+   share/spatha/spatha_icd.json
+   Puente Vulkan bionic<->glibc.
+   Copyright (c) 2026 LexusYTG.
+   Licencia: MIT. Ver share/LICENSES/MIT.txt.
+   Fuente: https://github.com/LexusYTG/Spatha
+
+5. Sesar Desktop Environment — share/sesar/sesar-shell
+   Entorno de escritorio en C puro (Xlib + FreeType).
+   Copyright (c) 2026 LexusYTG.
+   Licencia: MIT. Ver share/LICENSES/MIT.txt.
+   Fuente: https://github.com/LexusYTG/Sesar
+
+6. Scripts de integración (bin/session-bootstrap.sh, bin/session-start.sh,
+   bin/ubuntu-init.sh, share/spatha/scutum-guard.sh, share/spatha/gl-run,
+   share/spatha/manifest.txt)
+   Copyright (c) 2026 LexusYTG.
+   Licencia: MIT. Ver share/LICENSES/MIT.txt.
+
+7. Rootfs Ubuntu base — share/ubuntu-rootfs.tar.gz
+   Ubuntu 24.04 LTS. Se distribuye bajo las licencias de sus paquetes
+   individuales. Ubuntu es una marca registrada de Canonical Ltd.
