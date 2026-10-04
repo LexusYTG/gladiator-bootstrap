@@ -27,23 +27,16 @@ fi
 
 progress 85 "Instalando Scutum + Spatha + gl4es…"
 [ -d /host-spatha ] || { printf 'ERROR|%s\n' "/host-spatha no montado" >> "$PROGRESS"; exit 1; }
+[ -f /host-spatha/manifest.txt ] || { printf 'ERROR|%s\n' "manifest.txt no encontrado" >> "$PROGRESS"; exit 1; }
+[ -f /host-spatha/scutum-guard.sh ] || { printf 'ERROR|%s\n' "scutum-guard.sh no encontrado" >> "$PROGRESS"; exit 1; }
 
-mkdir -p /usr/lib/aarch64-linux-gnu /usr/share/vulkan/icd.d
-
-# Scutum reemplaza Mesa
-install -m 0755 /host-spatha/libEGL.so     /usr/lib/aarch64-linux-gnu/
-install -m 0755 /host-spatha/libGLESv2.so  /usr/lib/aarch64-linux-gnu/
-
-# gl4es
-install -m 0755 /host-spatha/libGL.so.1    /usr/lib/aarch64-linux-gnu/
-
-# Spatha ICD
-install -m 0755 /host-spatha/libspatha-icd.so /usr/lib/aarch64-linux-gnu/
-install -m 0644 /host-spatha/spatha_icd.json  /usr/share/vulkan/icd.d/
-
-progress 88 "Instalando scutum-guard…"
-[ -f /host-spatha/scutum-guard.sh ] && install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh
-[ -f /host-spatha/gl-run ] && install -m 0755 /host-spatha/gl-run /usr/local/bin/gl-run
+# Instalar el guard y correrlo. El guard lee manifest.txt y hace TODO:
+# copia .so, crea symlinks correctos (libGLESv2.so -> libEGL.so, etc),
+# deshabilita ICDs de Mesa, escribe /etc/profile.d/.
+mkdir -p /usr/local/bin
+install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh
+install -m 0755 /host-spatha/gl-run /usr/local/bin/gl-run 2>/dev/null || true
+/usr/local/bin/scutum-guard.sh || { printf 'ERROR|%s\n' "scutum-guard fallo" >> "$PROGRESS"; exit 1; }
 
 progress 90 "Copiando sesar-shell…"
 [ -f /tmp/sesar-shell ] || { printf 'ERROR|%s\n' "sesar-shell no llego" >> "$PROGRESS"; exit 1; }
