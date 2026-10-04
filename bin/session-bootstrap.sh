@@ -61,6 +61,20 @@ if ! pgrep -f scutumd >/dev/null 2>&1; then
 fi
 [ -S "$HOST_TMP/scutum.sock" ] || error_exit "scutumd no levanto el socket"
 
+progress 56 "Arrancando PulseAudio…"
+mkdir -p "$HOST_TMP"
+if ! pgrep -f pulseaudio >/dev/null 2>&1; then
+    rm -f "$HOST_TMP/pulse.sock"
+    "$PREFIX/bin/pulseaudio" --daemonize=no \
+        --exit-idle-time=-1 \
+        --load="module-native-protocol-unix socket=$HOST_TMP/pulse.sock auth-anonymous=1" \
+        --load="module-sles-sink" \
+        --load="module-null-sink sink_name=fallback" \
+        > "$PREFIX/var/log/pulseaudio.log" 2>&1 &
+    for i in $(seq 1 15); do [ -S "$HOST_TMP/pulse.sock" ] && break; sleep 1; done
+fi
+[ -S "$HOST_TMP/pulse.sock" ] && echo "pulseaudio OK" || echo "pulseaudio no levanto socket (no es fatal)"
+
 progress 60 "Preparando entorno grafico…"
 mkdir -p "$ROOTFS/root" "$ROOTFS/tmp"
 cp "$PREFIX/share/sesar/sesar-shell" "$ROOTFS/tmp/sesar-shell"
@@ -79,6 +93,7 @@ progress 70 "Instalando escritorio…"
         export LD_LIBRARY_PATH=/opt/mali:$LD_LIBRARY_PATH
         export SPATHA_SOCK=/host-tmp/spatha.sock
         export SCUTUM_SOCK=/host-tmp/scutum.sock
+        export PULSE_SERVER=unix:/host-tmp/pulse.sock
         export PD_PROGRESS_FILE='"$PROGRESS"'
         /tmp/ubuntu-init.sh || { printf "ERROR|init fallo\n" >> '"$PROGRESS"'; exit 1; }
     '
@@ -96,6 +111,7 @@ exec "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
         export LD_LIBRARY_PATH=/opt/mali:$LD_LIBRARY_PATH
         export SPATHA_SOCK=/host-tmp/spatha.sock
         export SCUTUM_SOCK=/host-tmp/scutum.sock
+        export PULSE_SERVER=unix:/host-tmp/pulse.sock
         [ -x /usr/local/bin/scutum-guard.sh ] || install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh 2>/dev/null
         /usr/local/bin/scutum-guard.sh 2>/dev/null || true
         cd /root
