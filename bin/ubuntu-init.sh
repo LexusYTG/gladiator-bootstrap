@@ -6,6 +6,14 @@ progress() { printf 'PROGRESS|%s|%s\n' "$1" "$2" >> "$PROGRESS"; }
 MARKER="$HOME/.sesar-ready"
 [ -f "$MARKER" ] && { progress 95 "ya inicializado"; exit 0; }
 
+# Auto-reparacion: si un intento anterior se interrumpio, dpkg queda
+# inconsistente y todos los apt install fallan hasta correr esto.
+if [ -e /var/lib/dpkg/status ]; then
+    progress 75 "Reparando dpkg (si hacia falta)…"
+    dpkg --configure -a >/dev/null 2>&1 || true
+    DEBIAN_FRONTEND=noninteractive apt install -y --fix-broken >/dev/null 2>&1 || true
+fi
+
 progress 76 "apt update…"
 apt update -qq
 
