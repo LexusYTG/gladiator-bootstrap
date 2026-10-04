@@ -20,7 +20,10 @@ export TERMUX__PREFIX="$PREFIX"
 export TERMUX_VERSION="gladiator"
 export PATH="$PREFIX/bin:$PREFIX/bin/applets:/usr/bin:/bin"
 export PROOT_TMP_DIR="$PREFIX/tmp"
-export PROOT_NO_SECCOMP=1
+# PROOT_NO_SECCOMP desactivado: forzaba ptrace en cada syscall (143x mas lento).
+# El proot de Android moderno usa seccomp sin problema. Reactivar solo si
+# en algun dispositivo puntual proot no arranca sin esto.
+# export PROOT_NO_SECCOMP=1
 
 progress 5 "Verificando container $CONTAINER_NAME…"
 "$PREFIX/bin/extract-ubuntu.sh" || error_exit "no se pudo preparar $CONTAINER_NAME"
@@ -73,6 +76,7 @@ if ! pgrep -f pulseaudio >/dev/null 2>&1; then
     PULSE_RUNTIME_PATH="$PREFIX/tmp/pulse-runtime" \
     LD_LIBRARY_PATH="$MODS:$PREFIX/lib/pulseaudio:$PREFIX/lib" \
         setsid "$PREFIX/bin/pulseaudio" --daemonize=no --exit-idle-time=-1 -n \
+            --disable-shm=1 \
             -F "$PREFIX/etc/pulse/gladiator.runtime.pa" \
             >> "$PREFIX/var/log/pulseaudio.log" 2>&1 &
     for i in $(seq 1 15); do [ -S "$HOST_TMP/pulse.sock" ] && break; sleep 1; done
