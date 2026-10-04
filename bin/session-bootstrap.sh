@@ -62,15 +62,19 @@ fi
 [ -S "$HOST_TMP/scutum.sock" ] || error_exit "scutumd no levanto el socket"
 
 progress 56 "Arrancando PulseAudio…"
-mkdir -p "$HOST_TMP"
+mkdir -p "$HOST_TMP" "$PREFIX/tmp/pulse-runtime" "$PREFIX/etc/pulse"
+chmod 700 "$PREFIX/tmp/pulse-runtime"
 if ! pgrep -f pulseaudio >/dev/null 2>&1; then
     rm -f "$HOST_TMP/pulse.sock"
-    "$PREFIX/bin/pulseaudio" --daemonize=no \
-        --exit-idle-time=-1 \
-        --load="module-native-protocol-unix socket=$HOST_TMP/pulse.sock auth-anonymous=1" \
-        --load="module-sles-sink" \
-        --load="module-null-sink sink_name=fallback" \
-        > "$PREFIX/var/log/pulseaudio.log" 2>&1 &
+    MODS="$PREFIX/lib/pulseaudio/modules"
+    sed -e "s|@MODS@|$MODS|g" -e "s|@HOST_TMP@|$HOST_TMP|g" \
+        "$PREFIX/etc/pulse/gladiator.pa" > "$PREFIX/etc/pulse/gladiator.runtime.pa"
+    TMPDIR="$PREFIX/tmp" \
+    PULSE_RUNTIME_PATH="$PREFIX/tmp/pulse-runtime" \
+    LD_LIBRARY_PATH="$MODS:$PREFIX/lib/pulseaudio:$PREFIX/lib" \
+        setsid "$PREFIX/bin/pulseaudio" --daemonize=no --exit-idle-time=-1 -n \
+            -F "$PREFIX/etc/pulse/gladiator.runtime.pa" \
+            >> "$PREFIX/var/log/pulseaudio.log" 2>&1 &
     for i in $(seq 1 15); do [ -S "$HOST_TMP/pulse.sock" ] && break; sleep 1; done
 fi
 [ -S "$HOST_TMP/pulse.sock" ] && echo "pulseaudio OK" || echo "pulseaudio no levanto socket (no es fatal)"

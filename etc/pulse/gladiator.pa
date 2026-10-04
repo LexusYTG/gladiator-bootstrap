@@ -1,0 +1,4 @@
+# Config minima de PulseAudio para Gladiator.
+# Los paths se sustituyen en runtime via sed por el arranque de sesion.
+load-module @MODS@/module-native-protocol-unix.so socket=@HOST_TMP@/pulse.sock auth-anonymous=1
+load-module @MODS@/module-null-sink.so sink_name=fallback
