@@ -90,6 +90,8 @@ cp "$PREFIX/bin/ubuntu-init.sh" "$ROOTFS/tmp/ubuntu-init.sh"
 cp "$PREFIX/bin/gladiator-game-hooks.sh" "$ROOTFS/tmp/gladiator-game-hooks.sh"
 chmod 755 "$ROOTFS/tmp/sesar-shell"
 chmod +x "$ROOTFS/tmp/ubuntu-init.sh"
+
+
 chmod +x "$ROOTFS/tmp/gladiator-game-hooks.sh"
 
 progress 70 "Instalando escritorio…"
@@ -140,6 +142,7 @@ exec "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
         [ -x /usr/local/bin/scutum-guard.sh ] || install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh 2>/dev/null
         /usr/local/bin/scutum-guard.sh 2>/dev/null || true
         cd /root
+        /host-spatha/spatha-guard.sh 2>&1 | tail -5
         ./sesar-shell setup
         exec ./sesar-shell session
     '
