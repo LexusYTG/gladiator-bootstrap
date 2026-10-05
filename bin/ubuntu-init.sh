@@ -3,6 +3,47 @@ set -e
 PROGRESS="${PD_PROGRESS_FILE:-/dev/null}"
 progress() { printf 'PROGRESS|%s|%s\n' "$1" "$2" >> "$PROGRESS"; }
 
+progress 74 "Wrappers de juegos con audio…"
+install -d /usr/local/bin
+if [ -x /usr/games/supertux2 ]; then
+    cat > /usr/local/bin/supertux2-audio.sh << 'WRAP'
+#!/bin/bash
+export PULSE_SERVER=unix:/host-tmp/pulse.sock
+export ALSOFT_DRIVERS=pulse
+LOG=/host-tmp/stk2.log
+echo "=== launch $(date) ===" > $LOG
+exec /usr/games/supertux2 >> $LOG 2>&1
+WRAP
+    chmod 755 /usr/local/bin/supertux2-audio.sh
+    F=/usr/share/applications/supertux2.desktop
+    if [ -f "$F" ]; then
+        [ -f "$F.bak" ] || cp "$F" "$F.bak"
+        sed -i "s|^Exec=.*|Exec=/usr/local/bin/supertux2-audio.sh|" "$F"
+    fi
+fi
+if [ -x /usr/games/redeclipse ]; then
+    cat > /usr/local/bin/redeclipse-gl.sh << 'WRAP'
+#!/bin/bash
+export DISPLAY=:0
+export XDG_RUNTIME_DIR=/tmp
+export SCUTUM_SOCK=/host-tmp/scutum.sock
+export SPATHA_SOCK=/host-tmp/spatha.sock
+export LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu
+export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libGL.so.1
+export SC_DEPTH_BITS=0
+LOG=/host-tmp/redeclipse.log
+echo "=== launch $(date) ===" > $LOG
+cd /root
+exec /usr/games/redeclipse >> $LOG 2>&1
+WRAP
+    chmod 755 /usr/local/bin/redeclipse-gl.sh
+    F=/usr/share/applications/redeclipse.desktop
+    if [ -f "$F" ]; then
+        [ -f "$F.bak" ] || cp "$F" "$F.bak"
+        sed -i "s|^Exec=.*|Exec=/usr/local/bin/redeclipse-gl.sh|" "$F"
+    fi
+fi
+
 MARKER="$HOME/.sesar-ready"
 [ -f "$MARKER" ] && { progress 95 "ya inicializado"; exit 0; }
 

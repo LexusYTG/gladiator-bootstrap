@@ -87,8 +87,10 @@ progress 60 "Preparando entorno grafico…"
 mkdir -p "$ROOTFS/root" "$ROOTFS/tmp"
 cp "$PREFIX/share/sesar/sesar-shell" "$ROOTFS/tmp/sesar-shell"
 cp "$PREFIX/bin/ubuntu-init.sh" "$ROOTFS/tmp/ubuntu-init.sh"
+cp "$PREFIX/bin/gladiator-game-hooks.sh" "$ROOTFS/tmp/gladiator-game-hooks.sh"
 chmod 755 "$ROOTFS/tmp/sesar-shell"
 chmod +x "$ROOTFS/tmp/ubuntu-init.sh"
+chmod +x "$ROOTFS/tmp/gladiator-game-hooks.sh"
 
 progress 70 "Instalando escritorio…"
 "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
@@ -105,6 +107,21 @@ progress 70 "Instalando escritorio…"
         export PD_PROGRESS_FILE='"$PROGRESS"'
         /tmp/ubuntu-init.sh || { printf "ERROR|init fallo\n" >> '"$PROGRESS"'; exit 1; }
     '
+
+progress 55 "Arrancando PulseAudio bionic…"
+mkdir -p "$PREFIX/var/log" "$PREFIX/tmp/host-tmp"
+MODS="$PREFIX/lib/pulseaudio/modules"
+if ! pgrep -f "gladiator.runtime.pa" >/dev/null 2>&1; then
+    rm -f "$PREFIX/tmp/host-tmp/pulse.sock" "$PREFIX/tmp/host-tmp/orator-pa.sock"
+    sed -e "s|@MODS@|$MODS|g" -e "s|@HOST_TMP@|$PREFIX/tmp/host-tmp|g" \
+        "$PREFIX/etc/pulse/gladiator.pa" > "$PREFIX/etc/pulse/gladiator.runtime.pa"
+    LD_LIBRARY_PATH="$MODS:$PREFIX/lib/pulseaudio:$PREFIX/lib" \
+        setsid "$PREFIX/bin/pulseaudio" --daemonize=no --exit-idle-time=-1 -n \
+            --disable-shm=1 -F "$PREFIX/etc/pulse/gladiator.runtime.pa" \
+            >> "$PREFIX/var/log/pulseaudio.log" 2>&1 &
+    for i in $(seq 1 15); do [ -S "$PREFIX/tmp/host-tmp/pulse.sock" ] && break; sleep 1; done
+fi
+"$PREFIX/bin/start-audio-chain.sh" >/dev/null 2>&1 || true
 
 progress 96 "Lanzando escritorio…"
 printf 'DONE\n' >> "$PROGRESS"
