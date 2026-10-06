@@ -64,25 +64,6 @@ if ! pgrep -f scutumd >/dev/null 2>&1; then
 fi
 [ -S "$HOST_TMP/scutum.sock" ] || error_exit "scutumd no levanto el socket"
 
-progress 56 "Arrancando PulseAudio…"
-mkdir -p "$HOST_TMP" "$PREFIX/tmp/pulse-runtime" "$PREFIX/etc/pulse"
-chmod 700 "$PREFIX/tmp/pulse-runtime"
-if ! pgrep -f pulseaudio >/dev/null 2>&1; then
-    rm -f "$HOST_TMP/pulse.sock"
-    MODS="$PREFIX/lib/pulseaudio/modules"
-    sed -e "s|@MODS@|$MODS|g" -e "s|@HOST_TMP@|$HOST_TMP|g" \
-        "$PREFIX/etc/pulse/gladiator.pa" > "$PREFIX/etc/pulse/gladiator.runtime.pa"
-    TMPDIR="$PREFIX/tmp" \
-    PULSE_RUNTIME_PATH="$PREFIX/tmp/pulse-runtime" \
-    LD_LIBRARY_PATH="$MODS:$PREFIX/lib/pulseaudio:$PREFIX/lib" \
-        setsid "$PREFIX/bin/pulseaudio" --daemonize=no --exit-idle-time=-1 -n \
-            --disable-shm=1 \
-            -F "$PREFIX/etc/pulse/gladiator.runtime.pa" \
-            >> "$PREFIX/var/log/pulseaudio.log" 2>&1 &
-    for i in $(seq 1 15); do [ -S "$HOST_TMP/pulse.sock" ] && break; sleep 1; done
-fi
-[ -S "$HOST_TMP/pulse.sock" ] && echo "pulseaudio OK" || echo "pulseaudio no levanto socket (no es fatal)"
-
 progress 60 "Preparando entorno grafico…"
 mkdir -p "$ROOTFS/root" "$ROOTFS/tmp"
 cp "$PREFIX/share/sesar/sesar-shell" "$ROOTFS/tmp/sesar-shell"
@@ -110,19 +91,11 @@ progress 70 "Instalando escritorio…"
         /tmp/ubuntu-init.sh || { printf "ERROR|init fallo\n" >> '"$PROGRESS"'; exit 1; }
     '
 
-progress 55 "Arrancando PulseAudio bionic…"
-mkdir -p "$PREFIX/var/log" "$PREFIX/tmp/host-tmp"
+progress 73 "Arrancando PulseAudio…"
+mkdir -p "$PREFIX/var/log" "$PREFIX/tmp/host-tmp" "$PREFIX/etc/pulse"
 MODS="$PREFIX/lib/pulseaudio/modules"
-if ! pgrep -f "gladiator.runtime.pa" >/dev/null 2>&1; then
-    rm -f "$PREFIX/tmp/host-tmp/pulse.sock" "$PREFIX/tmp/host-tmp/orator-pa.sock"
-    sed -e "s|@MODS@|$MODS|g" -e "s|@HOST_TMP@|$PREFIX/tmp/host-tmp|g" \
-        "$PREFIX/etc/pulse/gladiator.pa" > "$PREFIX/etc/pulse/gladiator.runtime.pa"
-    LD_LIBRARY_PATH="$MODS:$PREFIX/lib/pulseaudio:$PREFIX/lib" \
-        setsid "$PREFIX/bin/pulseaudio" --daemonize=no --exit-idle-time=-1 -n \
-            --disable-shm=1 -F "$PREFIX/etc/pulse/gladiator.runtime.pa" \
-            >> "$PREFIX/var/log/pulseaudio.log" 2>&1 &
-    for i in $(seq 1 15); do [ -S "$PREFIX/tmp/host-tmp/pulse.sock" ] && break; sleep 1; done
-fi
+sed -e "s|@MODS@|$MODS|g" -e "s|@HOST_TMP@|$PREFIX/tmp/host-tmp|g" \
+    "$PREFIX/etc/pulse/gladiator.pa" > "$PREFIX/etc/pulse/gladiator.runtime.pa"
 "$PREFIX/bin/start-audio-chain.sh" >/dev/null 2>&1 || true
 
 progress 96 "Lanzando escritorio…"
