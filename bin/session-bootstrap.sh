@@ -97,6 +97,10 @@ MODS="$PREFIX/lib/pulseaudio/modules"
 sed -e "s|@MODS@|$MODS|g" -e "s|@HOST_TMP@|$PREFIX/tmp/host-tmp|g" \
     "$PREFIX/etc/pulse/gladiator.pa" > "$PREFIX/etc/pulse/gladiator.runtime.pa"
 "$PREFIX/bin/start-audio-chain.sh" >/dev/null 2>&1 || true
+# Watchdog: relanza pulse si se cae
+if ! pgrep -f pulse-watchdog >/dev/null 2>&1; then
+    setsid "$PREFIX/bin/pulse-watchdog.sh" >> "$PREFIX/var/log/pulse-watchdog.log" 2>&1 &
+fi
 
 progress 96 "Lanzando escritorio…"
 printf 'DONE\n' >> "$PROGRESS"

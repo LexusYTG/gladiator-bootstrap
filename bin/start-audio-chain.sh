@@ -1,4 +1,9 @@
 #!/data/data/com.glads1/files/usr/bin/bash
+pa_pids() { /system/bin/ps -A -o PID,NAME 2>/dev/null | awk '$2=="pulseaudio"{print $1}'; }
+_PF="${PREFIX:-/data/data/com.glads1/files/usr}"
+if [ "$(pa_pids | grep -c .)" = "1" ] && [ -S "$_PF/tmp/host-tmp/pulse.sock" ] && [ -S "$_PF/tmp/host-tmp/orator-pa.sock" ]; then
+    echo "pulseaudio ya vivo, reuso pid=$(pa_pids | head -1)"; exit 0
+fi
 # start-audio-chain.sh — arranca UN solo PulseAudio en el host.
 # Este script es el UNICO lugar que arranca pulse. session-bootstrap.sh
 # NO debe arrancar pulse por su cuenta.
@@ -26,8 +31,8 @@ chmod 700 "$PULSE_RUNTIME_PATH"
 
 # Matar TODOS los pulseaudio vivos (con reintentos hasta que mueran todos)
 for i in 1 2 3 4 5 6 7 8 9 10; do
-    pgrep -x pulseaudio >/dev/null 2>&1 || break
-    pkill -9 -x pulseaudio 2>/dev/null
+    [ -n "$(pa_pids)" ] || break
+    for _p in $(pa_pids); do kill -9 "$_p" 2>/dev/null; done
     sleep 0.3
 done
 
@@ -49,7 +54,7 @@ for i in $(seq 1 30); do
     sleep 0.2
 done
 
-PULSE_PID=$(pgrep -x pulseaudio | head -1)
+PULSE_PID=$(pa_pids | head -1)
 if [ -S "$PREFIX/tmp/host-tmp/pulse.sock" ] && [ -n "$PULSE_PID" ]; then
     echo "pulseaudio OK pid=$PULSE_PID" >> "$LOG"
 else
