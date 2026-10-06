@@ -51,4 +51,11 @@ if [ -f "$SRC/spatha_icd.json" ]; then
     cp -f "$SRC/spatha_icd.json" "$ICDDIR/spatha_icd.json"
 fi
 
+# Lorica GL 3.1 core (opcional, LIBGL_GL=31)
+if [ -f "$SRC/libGL.so.1.lorica" ]; then
+    mkdir -p /root/Lorica
+    cp -f "$SRC/libGL.so.1.lorica" /root/Lorica/libGL.so.1
+    chmod 0755 /root/Lorica/libGL.so.1
+fi
+
 echo "[spatha-guard] OK"
