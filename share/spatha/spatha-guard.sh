@@ -52,9 +52,9 @@ if [ -f "$SRC/spatha_icd.json" ]; then
 fi
 
 # Lorica GL 3.1 core (opcional, LIBGL_GL=31)
-if [ -f "$SRC/libGL.so.1.lorica" ]; then
+if [ -f /host-lorica/libGL.so.1 ]; then
     mkdir -p /root/Lorica
-    cp -f "$SRC/libGL.so.1.lorica" /root/Lorica/libGL.so.1
+    cp -f /host-lorica/libGL.so.1 /root/Lorica/libGL.so.1
     chmod 0755 /root/Lorica/libGL.so.1
 fi
 

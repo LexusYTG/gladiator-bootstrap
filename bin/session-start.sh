@@ -84,6 +84,7 @@ exec "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
     --bind "$PREFIX/tmp/.X11-unix:/tmp/.X11-unix" \
     --bind "$PREFIX/lib/mali:/opt/mali" \
     --bind "$PREFIX/share/spatha:/host-spatha" \
+    --bind "$PREFIX/share/lorica:/host-lorica" \
     --bind "$HOST_TMP:/host-tmp" \
     -- /bin/bash -c '
         export DISPLAY='"$X11_DISPLAY"'
