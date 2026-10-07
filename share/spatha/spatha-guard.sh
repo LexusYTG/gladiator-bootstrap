@@ -37,11 +37,14 @@ if [ -f "$SRC/libEGL.so" ]; then
 fi
 
 # gl4es (libGL)
+# libGL.so.1 en el bootstrap AHORA es Lorica (traductor GL 3.2).
+# No se toca con cmp. Se copia siempre que difiera, que es la unica forma
+# de actualizar tras un rebuild del bootstrap.
 if [ -f "$SRC/libGL.so.1" ]; then
     cmp -s "$SRC/libGL.so.1" "$LIBDIR/libGL.so.1" || {
         cp -f "$SRC/libGL.so.1" "$LIBDIR/libGL.so.1"
         chmod 0755 "$LIBDIR/libGL.so.1"
-        echo "[spatha-guard] libGL.so.1 actualizado"
+        echo "[spatha-guard] libGL.so.1 (Lorica) actualizado"
     }
 fi
 
@@ -57,5 +60,21 @@ if [ -f /host-lorica/libGL.so.1 ]; then
     cp -f /host-lorica/libGL.so.1 /root/Lorica/libGL.so.1
     chmod 0755 /root/Lorica/libGL.so.1
 fi
+
+# ICD JSON de Spatha: se reescribe en CADA arranque para sobrevivir a Mesa
+# (los paquetes de mesa-vulkan-drivers reinstalan su lvp_icd.json y a veces
+# pisan el directorio completo de ICDs). El contenido se escribe literal, no
+# se copia, así siempre queda el correcto.
+mkdir -p /usr/share/vulkan/icd.d /etc/vulkan/icd.d
+cat > /usr/share/vulkan/icd.d/spatha_icd.json << 'ICDEOF'
+{
+    "file_format_version": "1.0.0",
+    "ICD": {
+        "library_path": "/usr/lib/aarch64-linux-gnu/libspatha-icd.so",
+        "api_version": "1.3.0"
+    }
+}
+ICDEOF
+cp -f /usr/share/vulkan/icd.d/spatha_icd.json /etc/vulkan/icd.d/spatha_icd.json
 
 echo "[spatha-guard] OK"
