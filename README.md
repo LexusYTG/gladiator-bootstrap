@@ -56,6 +56,6 @@ Only the session scripts were rewritten (`session-bootstrap.sh`, `session-start.
 
 Full details are in `share/LICENSES/ATTRIBUTION.txt`.
 
-## Legal
+## License
 
-All license texts and attributions are in `share/LICENSES/`. Start with `ATTRIBUTION.txt`.
+**GPL-3.0** for Gladiator and its own scripts. Third-party components keep their own licenses; the full texts and attributions are in `share/LICENSES/`. Start with `ATTRIBUTION.txt`.
