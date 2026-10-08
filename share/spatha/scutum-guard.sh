@@ -25,7 +25,12 @@ cat > /etc/profile.d/gladiator-gl.sh << 'ENVEOF'
 export SPATHA_SOCK=/host-tmp/spatha.sock
 export SCUTUM_SOCK=/host-tmp/scutum.sock
 export XDG_RUNTIME_DIR=/tmp
+export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/spatha_icd.json
 ENVEOF
 chmod 0644 /etc/profile.d/gladiator-gl.sh
+# Persistir en /etc/environment para login shells no interactivos (pam_env)
+if ! grep -q '^VK_ICD_FILENAMES=' /etc/environment 2>/dev/null; then
+    echo 'VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/spatha_icd.json' >> /etc/environment
+fi
 mkdir -p /var/lib && touch /var/lib/scutum-guard.ok
 log "OK"
