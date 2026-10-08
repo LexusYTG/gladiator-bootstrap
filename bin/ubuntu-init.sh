@@ -66,6 +66,10 @@ if ! DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
     exit 1
 fi
 
+progress 84 "Ocultando libudev (Godot/SDL fallback a /dev/input)…"
+UD=/usr/lib/aarch64-linux-gnu/libudev.so.1
+[ -e "$UD" ] && [ ! -e "$UD.hidden" ] && mv "$UD" "$UD.hidden" || true
+
 progress 85 "Instalando Scutum + Spatha + gl4es…"
 [ -d /host-spatha ] || { printf 'ERROR|%s\n' "/host-spatha no montado" >> "$PROGRESS"; exit 1; }
 [ -f /host-spatha/manifest.txt ] || { printf 'ERROR|%s\n' "manifest.txt no encontrado" >> "$PROGRESS"; exit 1; }
