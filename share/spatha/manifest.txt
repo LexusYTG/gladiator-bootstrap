@@ -18,3 +18,9 @@ disable|/usr/share/vulkan/icd.d/panfrost_icd.json
 disable|/usr/share/vulkan/icd.d/powervr_mesa_icd.json
 disable|/usr/share/vulkan/icd.d/virtio_icd.json
 disable|/usr/share/vulkan/icd.d/gfxstream_vk_icd.json
+file|box86/box86|/usr/local/bin/box86.real|0755
+file|box86/lib/ld-linux-armhf.so.3|/usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3|0644
+file|box86/lib/libc.so.6|/usr/arm-linux-gnueabihf/lib/libc.so.6|0644
+file|box86/lib/libm.so.6|/usr/arm-linux-gnueabihf/lib/libm.so.6|0644
+file|box86/lib/libresolv.so.2|/usr/arm-linux-gnueabihf/lib/libresolv.so.2|0644
+file|box86/lib/libgcc_s.so.1|/usr/arm-linux-gnueabihf/lib/libgcc_s.so.1|0644

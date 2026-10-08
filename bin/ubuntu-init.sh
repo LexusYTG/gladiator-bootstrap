@@ -79,6 +79,17 @@ install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh
 install -m 0755 /host-spatha/gl-run /usr/local/bin/gl-run 2>/dev/null || true
 /usr/local/bin/scutum-guard.sh || { printf 'ERROR|%s\n' "scutum-guard fallo" >> "$PROGRESS"; exit 1; }
 
+progress 88 "Wrapper de box86…"
+if [ -x /usr/local/bin/box86.real ]; then
+    cat > /usr/local/bin/box86 << 'WRAP86'
+#!/bin/bash
+exec /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 \
+     --library-path /usr/arm-linux-gnueabihf/lib \
+     /usr/local/bin/box86.real "$@"
+WRAP86
+    chmod 0755 /usr/local/bin/box86
+fi
+
 progress 90 "Copiando sesar-shell…"
 [ -f /tmp/sesar-shell ] || { printf 'ERROR|%s\n' "sesar-shell no llego" >> "$PROGRESS"; exit 1; }
 install -m 0755 /tmp/sesar-shell /root/sesar-shell
