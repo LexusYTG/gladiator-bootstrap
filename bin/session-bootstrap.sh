@@ -127,6 +127,8 @@ exec "$PREFIX/bin/proot-distro" login "$CONTAINER_NAME" \
         export PULSE_SERVER=unix:/host-tmp/pulse.sock
         [ -x /usr/local/bin/scutum-guard.sh ] || install -m 0755 /host-spatha/scutum-guard.sh /usr/local/bin/scutum-guard.sh 2>/dev/null
         /usr/local/bin/scutum-guard.sh 2>/dev/null || true
+        LIBBOX=/usr/lib/aarch64-linux-gnu/libboxbridge.so
+        [ -f "$LIBBOX" ] && export LD_PRELOAD="$LIBBOX"
         cd /root
         /host-spatha/spatha-guard.sh 2>&1 | tail -5
         ./sesar-shell setup
