@@ -14,6 +14,14 @@ error_exit() { printf 'ERROR|%s\n' "$1" >> "$PROGRESS"; exit 1; }
 : > "$PROGRESS"
 trap 'error_exit "fallo en linea $LINENO"' ERR
 
+# Actualizaciones pendientes del store. El UpdateActivity descarga en
+# tmp/updates/staging y deja apply.sh listo. Acá lo corremos ANTES de
+# extraer nada, así los binarios nuevos se usan desde este arranque.
+if [ -f "$PREFIX/tmp/updates/apply.sh" ]; then
+    progress 2 "Aplicando actualizaciones…"
+    bash "$PREFIX/tmp/updates/apply.sh" || true
+fi
+
 export TERMUX_APP__PACKAGE_NAME="com.glads1"
 export TERMUX__HOME="$PREFIX/home"
 export TERMUX__PREFIX="$PREFIX"
