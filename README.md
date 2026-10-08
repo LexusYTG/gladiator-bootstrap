@@ -46,16 +46,16 @@ Only the session scripts were rewritten (`session-bootstrap.sh`, `session-start.
 
 ## Components
 
-| Component | Source | License |
+| Component | Source |
 |---|---|---|
-| Scutum | [LexusYTG/Scutum](https://github.com/LexusYTG/Scutum) | MIT |
-| Spatha | [LexusYTG/Spatha](https://github.com/LexusYTG/Spatha) | MIT |
-| Sesar | [LexusYTG/Sesar](https://github.com/LexusYTG/Sesar) | MIT |
-| gl4es | Sebastien Chevalier | MIT |
-| Termux base | Termux project | Mostly GPL-3.0 |
+| Scutum | [LexusYTG/Scutum](https://github.com/LexusYTG/Scutum) |
+| Spatha | [LexusYTG/Spatha](https://github.com/LexusYTG/Spatha) |
+| Sesar | [LexusYTG/Sesar](https://github.com/LexusYTG/Sesar) |
+| gl4es | Sebastien Chevalier |
+| Termux base | Termux project |
 
 Full details are in `share/LICENSES/ATTRIBUTION.txt`.
 
-## License
+## Legal
 
-The Termux-derived parts and Gladiator's orchestration scripts are **GPL-3.0**, consistent with the main Gladiator project. Scutum, Spatha and Sesar are **MIT**. gl4es is **MIT**. Each component's own license text is in `share/LICENSES/`.
+All license texts and attributions are in `share/LICENSES/`. Start with `ATTRIBUTION.txt`.
